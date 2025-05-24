@@ -1,0 +1,69 @@
+# monitoring/grafana/memory-dashboards/agent-performance.json
+# Agent Performance Dashboard
+
+{
+  "dashboard": {
+    "id": null,
+    "title": "Agent Performance Dashboard",
+    "tags": ["agents", "performance"],
+    "panels": [
+      {
+        "id": 1,
+        "title": "Agent Memory Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "agent_memory_count by (agent_id)",
+            "legendFormat": "{{agent_id}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Agent Activity",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "rate(agent_operations_total[5m]) by (agent_id)",
+            "legendFormat": "{{agent_id}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Memory Importance Distribution",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, agent_memory_importance) by (agent_id)",
+            "legendFormat": "95th percentile - {{agent_id}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 8
+        }
+      }
+    ],
+    "time": {
+      "from": "now-6h", 
+      "to": "now"
+    },
+    "refresh": "1m"
+  }
+}
+

@@ -1,0 +1,96 @@
+# workflows/memory-consolidation.yaml
+# Memory consolidation workflow definition
+
+workflow:
+  name: "Memory Consolidation Workflow"
+  description: "Automated workflow for memory consolidation across agents"
+  version: "1.0.0"
+  
+triggers:
+  - type: "schedule"
+    cron: "0 */6 * * *"  # Every 6 hours
+    enabled: true
+    
+  - type: "threshold"
+    condition: "working_memory_count > 80"
+    enabled: true
+    
+  - type: "agent_request"
+    enabled: true
+
+steps:
+  - name: "pre_consolidation_check"
+    type: "validation"
+    actions:
+      - check_system_health
+      - verify_database_connections
+      - validate_agent_status
+    failure_action: "abort"
+    
+  - name: "memory_analysis"
+    type: "analysis"
+    actions:
+      - analyze_working_memory
+      - calculate_importance_scores
+      - identify_consolidation_candidates
+      - detect_memory_patterns
+    
+  - name: "consolidation_planning"
+    type: "planning"
+    actions:
+      - determine_consolidation_strategy
+      - allocate_target_memory_types
+      - estimate_processing_time
+      - prepare_batch_groups
+    
+  - name: "memory_consolidation"
+    type: "processing"
+    parallel: true
+    actions:
+      - consolidate_high_importance_memories
+      - consolidate_medium_importance_memories
+      - consolidate_low_importance_memories
+    retry_policy:
+      max_attempts: 3
+      backoff: "exponential"
+      
+  - name: "post_consolidation"
+    type: "cleanup"
+    actions:
+      - update_memory_statistics
+      - cleanup_consolidated_working_memory
+      - log_consolidation_results
+      - notify_monitoring_system
+    
+  - name: "quality_assessment"
+    type: "validation"
+    actions:
+      - assess_consolidation_quality
+      - verify_memory_integrity
+      - update_performance_metrics
+
+error_handling:
+  - type: "database_error"
+    action: "retry_with_backoff"
+    max_retries: 3
+    
+  - type: "memory_corruption"
+    action: "restore_from_backup"
+    alert: true
+    
+  - type: "resource_exhaustion"
+    action: "throttle_and_reschedule"
+
+monitoring:
+  metrics:
+    - consolidation_duration
+    - memories_processed
+    - success_rate
+    - error_count
+  
+  alerts:
+    - condition: "consolidation_duration > 30_minutes"
+      severity: "warning"
+    - condition: "success_rate < 0.9"
+      severity: "critical"
+

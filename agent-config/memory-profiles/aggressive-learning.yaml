@@ -1,0 +1,40 @@
+# agent-config/memory-profiles/aggressive-learning.yaml
+# Aggressive learning profile - fast adaptation, high throughput
+
+memory_profile:
+  name: "Aggressive Learning Profile"
+  description: "Fast learning and adaptation with high memory throughput"
+  version: "1.0.0"
+
+retention_settings:
+  working_memory:
+    retention_factor: 0.8     # Faster turnover
+    decay_rate: 0.9          # Faster decay
+    
+  episodic_memory:
+    retention_days: 30       # Shorter retention
+    importance_threshold: 0.3 # Lower threshold
+    decay_rate: 0.98         # Moderate decay
+    
+  semantic_memory:
+    similarity_threshold: 0.7 # Lower similarity threshold
+    concept_lifetime_days: 60
+    relationship_strength_threshold: 0.5
+
+consolidation_behavior:
+  frequency_multiplier: 2.0    # More frequent consolidation
+  importance_boost: 0.9        # Less importance boost
+  batch_size_modifier: 1.5     # Larger batches
+  experimentation_encouraged: true
+
+filtering_criteria:
+  minimum_importance: 0.2      # Lower threshold
+  emotional_threshold: 0.1     # Accept more emotional content
+  novelty_preference: 0.8      # Prefer new information
+  rapid_integration: true
+
+learning_parameters:
+  adaptation_rate: 0.2         # Fast adaptation
+  confidence_requirement: 0.5  # Lower confidence needed
+  hypothesis_formation: true   # Form hypotheses quickly
+  exploratory_learning: true

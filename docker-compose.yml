@@ -1,0 +1,897 @@
+# ==============================================
+# Memory-Enhanced AI Platform - Complete Docker Compose
+# Integrates all services with proper dependencies and networking
+# ==============================================
+
+version: '3.8'
+
+services:
+  # ==============================================
+  # Memory Storage Backends
+  # ==============================================
+  
+  # Redis - Working Memory & Caching
+  redis-memory:
+    image: redis:7-alpine
+    container_name: redis-memory
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_memory_data:/data
+      - ./config/redis-memory.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-memorypass123}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-memorypass123}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - memory-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # PostgreSQL - Episodic Memory with Vector Extension
+  postgres-memory:
+    image: pgvector/pgvector:pg15
+    container_name: postgres-memory
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: memories
+      POSTGRES_USER: memory_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-memorypass123}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_memory_data:/var/lib/postgresql/data
+      - ./database/init-memory.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./database/memory-schema.sql:/docker-entrypoint-initdb.d/02-schema.sql
+      - ./database/seed-data.sql:/docker-entrypoint-initdb.d/03-seed-data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U memory_user -d memories"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - memory-network
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ChromaDB - Semantic Memory Vector Store  
+  chroma-memory:
+    image: chromadb/chroma:latest
+    container_name: chroma-memory
+    restart: unless-stopped
+    ports:
+      - "8004:8000"
+    volumes:
+      - chroma_memory_data:/chroma/chroma
+      - ./config/chroma-config.yaml:/chroma/config.yaml
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+      - PERSIST_DIRECTORY=/chroma/chroma
+      - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=/chroma/config.yaml
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - memory-network
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: '2.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Neo4j - Procedural & Associative Memory
+  neo4j-memory:
+    image: neo4j:5-community
+    container_name: neo4j-memory
+    restart: unless-stopped
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:-memorypass123}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_dbms_memory_heap_initial__size=512m
+      - NEO4J_dbms_memory_heap_max__size=2G
+      - NEO4J_dbms_memory_pagecache_size=1G
+    volumes:
+      - neo4j_memory_data:/data
+      - neo4j_memory_logs:/logs
+      - ./config/neo4j-memory.conf:/var/lib/neo4j/conf/neo4j.conf
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "${NEO4J_PASSWORD:-memorypass123}", "RETURN 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - memory-network
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: '2.0'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # TimescaleDB - Time-series Episodic Memory (Alternative)
+  timescaledb-memory:
+    image: timescale/timescaledb:latest-pg15
+    container_name: timescaledb-memory
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: timeseries_memories
+      POSTGRES_USER: ts_memory_user
+      POSTGRES_PASSWORD: ${TIMESCALE_PASSWORD:-memorypass123}
+    ports:
+      - "5434:5432"
+    volumes:
+      - timescaledb_memory_data:/var/lib/postgresql/data
+      - ./database/timescale-init.sql:/docker-entrypoint-initdb.d/init.sql
+    profiles:
+      - timescale
+    networks:
+      - memory-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.5'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==============================================
+  # Core Memory-Enhanced AI Services
+  # ==============================================
+
+  # Memory-Enhanced MCP Server
+  mcp-memory-server:
+    build:
+      context: ./services/mcp-memory-server
+      dockerfile: Dockerfile
+    container_name: mcp-memory-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - ACCESS_TOKEN=${MCP_ACCESS_TOKEN:-secure-memory-token}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      
+      # Memory system configuration
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-memorypass123}@redis-memory:6379/0
+      - POSTGRES_URL=postgresql://memory_user:${POSTGRES_PASSWORD:-memorypass123}@postgres-memory:5432/memories
+      - CHROMA_HOST=chroma-memory
+      - CHROMA_PORT=8000
+      - NEO4J_URI=bolt://neo4j-memory:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-memorypass123}
+      
+      # Memory system settings
+      - MEMORY_CONSOLIDATION_INTERVAL=21600  # 6 hours
+      - MEMORY_CLEANUP_INTERVAL=3600        # 1 hour
+      - WORKING_MEMORY_CAPACITY=${WORKING_MEMORY_CAPACITY:-7}
+      - WORKING_MEMORY_TTL=${WORKING_MEMORY_TTL:-1800}             # 30 minutes
+      - EPISODIC_MEMORY_DECAY_RATE=${EPISODIC_MEMORY_DECAY_RATE:-0.99}
+      - SEMANTIC_MEMORY_SIMILARITY_THRESHOLD=${SEMANTIC_MEMORY_SIMILARITY_THRESHOLD:-0.85}
+      - ENABLE_MEMORY_ANALYTICS=${ENABLE_MEMORY_ANALYTICS:-true}
+      - ENABLE_AUTOMATIC_CONSOLIDATION=${ENABLE_AUTOMATIC_CONSOLIDATION:-true}
+      
+    volumes:
+      - ./config/memory-config.yaml:/app/config/memory.yaml
+      - ./logs:/app/logs
+      - ./models:/app/models
+    depends_on:
+      redis-memory:
+        condition: service_healthy
+      postgres-memory:
+        condition: service_healthy
+      chroma-memory:
+        condition: service_healthy
+      neo4j-memory:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Memory-Enhanced RAG Service
+  rag-memory-service:
+    build:
+      context: ./services/rag-memory-service
+      dockerfile: Dockerfile
+    container_name: rag-memory-service
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+    environment:
+      - ACCESS_TOKEN=${MCP_ACCESS_TOKEN:-secure-memory-token}
+      - MEMORY_SYSTEM_URL=http://mcp-memory-server:8080
+      - CHROMA_URL=http://chroma-memory:8000
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - EMBEDDING_MODEL=text-embedding-ada-002
+      - ENABLE_MEMORY_GUIDED_RETRIEVAL=${ENABLE_MEMORY_GUIDED_RETRIEVAL:-true}
+      - ENABLE_QUERY_EXPANSION=${ENABLE_QUERY_EXPANSION:-true}
+      - ENABLE_PERSONALIZATION=${ENABLE_PERSONALIZATION:-true}
+      - CACHE_TTL=3600
+      - MAX_CONTEXT_LENGTH=4000
+      - SIMILARITY_THRESHOLD=0.7
+    volumes:
+      - ./data/documents:/app/documents
+      - ./models:/app/models
+    depends_on:
+      - mcp-memory-server
+      - chroma-memory
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+          cpus: '2.0'
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Memory-Aware Agent Orchestrator
+  agent-memory-orchestrator:
+    build:
+      context: ./services/agent-memory-orchestrator
+      dockerfile: Dockerfile
+    container_name: agent-memory-orchestrator
+    restart: unless-stopped
+    ports:
+      - "8003:8000"
+    environment:
+      - ACCESS_TOKEN=${MCP_ACCESS_TOKEN:-secure-memory-token}
+      - MEMORY_SYSTEM_URL=http://mcp-memory-server:8080
+      - RAG_SERVICE_URL=http://rag-memory-service:8000
+      - MCP_SERVICE_URL=http://mcp-memory-server:8080
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      
+      # Agent configuration
+      - MAX_CONCURRENT_AGENTS=${MAX_CONCURRENT_AGENTS:-10}
+      - AGENT_MEMORY_SYNC_INTERVAL=${AGENT_MEMORY_SYNC_INTERVAL:-300}     # 5 minutes
+      - ENABLE_MULTI_AGENT_COORDINATION=${ENABLE_MULTI_AGENT_COORDINATION:-true}
+      - ENABLE_AGENT_LEARNING=${ENABLE_AGENT_LEARNING:-true}
+      - WORKING_MEMORY_SHARING=${WORKING_MEMORY_SHARING:-true}
+      
+    volumes:
+      - ./agent-config:/app/config
+      - ./workflows:/app/workflows
+    depends_on:
+      - mcp-memory-server
+      - rag-memory-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '3.0'
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Memory Analytics Dashboard
+  memory-analytics:
+    build:
+      context: ./services/memory-analytics
+      dockerfile: Dockerfile
+    container_name: memory-analytics
+    restart: unless-stopped
+    ports:
+      - "8005:8000"
+    environment:
+      - ACCESS_TOKEN=${MCP_ACCESS_TOKEN:-secure-memory-token}
+      - MEMORY_SYSTEM_URL=http://mcp-memory-server:8080
+      - POSTGRES_URL=postgresql://memory_user:${POSTGRES_PASSWORD:-memorypass123}@postgres-memory:5432/memories
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-memorypass123}@redis-memory:6379/0
+      - REFRESH_INTERVAL=300  # 5 minutes
+      - DATA_RETENTION_DAYS=30
+    volumes:
+      - ./data/exports:/app/exports
+    depends_on:
+      - mcp-memory-server
+      - postgres-memory
+      - redis-memory
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Memory Health Monitor
+  memory-health-monitor:
+    build:
+      context: ./services/memory-health-monitor
+      dockerfile: Dockerfile
+    container_name: memory-health-monitor
+    restart: unless-stopped
+    environment:
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-memorypass123}@redis-memory:6379/0
+      - POSTGRES_URL=postgresql://memory_user:${POSTGRES_PASSWORD:-memorypass123}@postgres-memory:5432/memories
+      - CHROMA_URL=http://chroma-memory:8000
+      - NEO4J_URI=bolt://neo4j-memory:7687
+      - NEO4J_USERNAME=neo4j
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD:-memorypass123}
+      - CHECK_INTERVAL=60  # 1 minute
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL}
+    depends_on:
+      - redis-memory
+      - postgres-memory
+      - chroma-memory
+      - neo4j-memory
+      - mcp-memory-server
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==============================================
+  # API Gateway & Load Balancer
+  # ==============================================
+
+  # Memory-Aware API Gateway
+  memory-api-gateway:
+    image: nginx:alpine
+    container_name: memory-api-gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/memory-nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - mcp-memory-server
+      - rag-memory-service
+      - agent-memory-orchestrator
+      - memory-analytics
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==============================================
+  # Monitoring & Analytics
+  # ==============================================
+
+  # Enhanced Prometheus with Memory Metrics
+  prometheus-memory:
+    image: prom/prometheus:latest
+    container_name: prometheus-memory
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus-memory.yml:/etc/prometheus/prometheus.yml
+      - ./monitoring/prometheus/rules:/etc/prometheus/rules
+      - prometheus_memory_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-admin-api'
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Enhanced Grafana with Memory Dashboards
+  grafana-memory:
+    image: grafana/grafana:latest
+    container_name: grafana-memory
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    volumes:
+      - grafana_memory_data:/var/lib/grafana
+      - ./monitoring/grafana/memory-dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus-memory
+      - postgres-memory
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==============================================
+  # Development Tools (Optional)
+  # ==============================================
+
+  # Redis Commander - Memory Cache Inspector
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander-memory
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=memory:redis-memory:6379:0:${REDIS_PASSWORD:-memorypass123}
+      - HTTP_USER=admin
+      - HTTP_PASSWORD=${REDIS_COMMANDER_PASSWORD:-admin}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis-memory
+    profiles:
+      - development
+    networks:
+      - memory-network
+
+  # pgAdmin - Database Management
+  pgadmin-memory:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-memory
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@memory.ai
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_memory_data:/var/lib/pgadmin
+    depends_on:
+      - postgres-memory
+    profiles:
+      - development
+    networks:
+      - memory-network
+
+  # Jupyter Lab for Data Analysis
+  jupyter-memory:
+    image: jupyter/datascience-notebook:latest
+    container_name: jupyter-memory
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=${JUPYTER_TOKEN:-memory-jupyter}
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./data:/home/jovyan/data
+    profiles:
+      - development
+    networks:
+      - memory-network
+
+  # ==============================================
+  # Backup & Maintenance
+  # ==============================================
+
+  # Automated Backup Service
+  backup-service:
+    build:
+      context: ./services/backup
+      dockerfile: Dockerfile
+    container_name: memory-backup-service
+    restart: unless-stopped
+    environment:
+      - BACKUP_SCHEDULE=0 2 * * *  # Daily at 2 AM
+      - BACKUP_RETENTION_DAYS=30
+      - S3_BUCKET=${BACKUP_S3_BUCKET}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./backups:/app/backups
+      - ./scripts:/app/scripts
+    depends_on:
+      - postgres-memory
+      - redis-memory
+      - neo4j-memory
+      - chroma-memory
+    profiles:
+      - production
+    networks:
+      - memory-network
+
+# ==============================================
+# Networks
+# ==============================================
+
+networks:
+  memory-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.25.0.0/16
+          gateway: 172.25.0.1
+    driver_opts:
+      com.docker.network.bridge.name: memory-bridge
+
+# ==============================================
+# Volumes
+# ==============================================
+
+volumes:
+  redis_memory_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/redis
+  
+  postgres_memory_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/postgres
+  
+  chroma_memory_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/chroma
+  
+  neo4j_memory_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/neo4j
+  
+  neo4j_memory_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/neo4j-logs
+  
+  timescaledb_memory_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/timescaledb
+  
+  prometheus_memory_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/prometheus
+  
+  grafana_memory_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/grafana
+  
+  pgadmin_memory_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./volumes/pgadmin
+
+# ==============================================
+# Extension: Additional Services
+# ==============================================
+# Updated docker-compose.yml (addition to existing services)
+# Add this service to the existing docker-compose.yml
+
+  # DocumentProcessor Agent Service
+  document-processor:
+    build:
+      context: ./services/document-processor
+      dockerfile: Dockerfile
+    container_name: document-processor
+    restart: unless-stopped
+    ports:
+      - "8006:8000"
+    environment:
+      - ACCESS_TOKEN=${MCP_ACCESS_TOKEN:-secure-memory-token}
+      - MCP_SERVER_URL=http://mcp-memory-server:8080
+      - RAG_SERVICE_URL=http://rag-memory-service:8000
+      - POSTGRES_URL=postgresql://memory_user:${POSTGRES_PASSWORD:-memorypass123}@postgres-memory:5432/memories
+      - CHROMA_HOST=chroma-memory
+      - CHROMA_PORT=8000
+      - EMBEDDING_MODEL=all-MiniLM-L6-v2
+      - ENABLE_OCR=${ENABLE_OCR:-true}
+      - ENABLE_NLP_ANALYSIS=${ENABLE_NLP_ANALYSIS:-true}
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-100}
+      - PROCESSING_TIMEOUT_MINUTES=${PROCESSING_TIMEOUT_MINUTES:-60}
+      - MAX_CONCURRENT_JOBS=${MAX_CONCURRENT_JOBS:-5}
+      - CHUNK_SIZE=${DEFAULT_CHUNK_SIZE:-1000}
+      - CHUNK_OVERLAP=${DEFAULT_CHUNK_OVERLAP:-200}
+    volumes:
+      - ./data/documents:/app/uploads
+      - ./data/processed:/app/processed
+      - ./data/temp:/app/temp
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./config/document-processor-config.yaml:/app/config.yaml
+    depends_on:
+      - mcp-memory-server
+      - postgres-memory
+      - chroma-memory
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 2G
+          cpus: '1.0'
+    networks:
+      - memory-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Update API Gateway to include DocumentProcessor
+# Add to nginx/memory-nginx.conf
+
+        # DocumentProcessor API
+        location /api/documents/ {
+            limit_req zone=api burst=15 nodelay;
+            
+            proxy_pass http://document-processor:8000/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # Longer timeouts for document processing
+            proxy_connect_timeout 120s;
+            proxy_send_timeout 120s;
+            proxy_read_timeout 120s;
+            
+            # Larger body size for document uploads
+            client_max_body_size 100M;
+        }
+
+
+
+
+
+
+# Uncomment and configure as needed:
+
+# x-extra-services:
+#   # Message Queue for Async Processing
+#   rabbitmq-memory:
+#     image: rabbitmq:3-management-alpine
+#     container_name: rabbitmq-memory
+#     environment:
+#       RABBITMQ_DEFAULT_USER: memory_user
+#       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-memorypass123}
+#     ports:
+#       - "5672:5672"
+#       - "15672:15672"
+#     networks:
+#       - memory-network
+#
+#   # Elasticsearch for Advanced Search
+#   elasticsearch-memory:
+#     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+#     container_name: elasticsearch-memory
+#     environment:
+#       - discovery.type=single-node
+#       - xpack.security.enabled=false
+#     ports:
+#       - "9200:9200"
+#     networks:
+#       - memory-network
+#
+#   # Kibana for Elasticsearch Visualization
+#   kibana-memory:
+#     image: docker.elastic.co/kibana/kibana:8.11.0
+#     container_name: kibana-memory
+#     ports:
+#       - "5601:5601"
+#     depends_on:
+#       - elasticsearch-memory
+#     networks:
+#       - memory-network
+
+# ==============================================
+# Environment Variables Template (.env)
+# ==============================================
+
+# Copy to .env and configure:
+#
+# # API Keys
+# OPENAI_API_KEY=your-openai-key
+# ANTHROPIC_API_KEY=your-anthropic-key
+# MCP_ACCESS_TOKEN=your-secure-token
+#
+# # Database Passwords  
+# REDIS_PASSWORD=secure-redis-password
+# POSTGRES_PASSWORD=secure-postgres-password
+# NEO4J_PASSWORD=secure-neo4j-password
+# TIMESCALE_PASSWORD=secure-timescale-password
+#
+# # Memory System Configuration
+# WORKING_MEMORY_CAPACITY=7
+# WORKING_MEMORY_TTL=1800
+# EPISODIC_MEMORY_DECAY_RATE=0.99
+# SEMANTIC_MEMORY_SIMILARITY_THRESHOLD=0.85
+# ENABLE_MEMORY_ANALYTICS=true
+# ENABLE_AUTOMATIC_CONSOLIDATION=true
+#
+# # Agent Configuration
+# MAX_CONCURRENT_AGENTS=10
+# AGENT_MEMORY_SYNC_INTERVAL=300
+# ENABLE_MULTI_AGENT_COORDINATION=true
+# ENABLE_AGENT_LEARNING=true
+# WORKING_MEMORY_SHARING=true
+#
+# # RAG Configuration
+# ENABLE_MEMORY_GUIDED_RETRIEVAL=true
+# ENABLE_QUERY_EXPANSION=true
+# ENABLE_PERSONALIZATION=true
+#
+# # Admin Passwords
+# GRAFANA_PASSWORD=secure-grafana-password
+# PGADMIN_PASSWORD=secure-pgadmin-password
+# REDIS_COMMANDER_PASSWORD=secure-commander-password
+# JUPYTER_TOKEN=secure-jupyter-token
+#
+# # Monitoring and Alerts
+# ALERT_WEBHOOK_URL=https://hooks.slack.com/your-webhook
+#
+# # Backup Configuration (Production)
+# BACKUP_S3_BUCKET=your-backup-bucket
+# AWS_ACCESS_KEY_ID=your-aws-key
+# AWS_SECRET_ACCESS_KEY=your-aws-secret
+
+# ==============================================
+# Usage Commands
+# ==============================================
+
+# Start complete memory-enhanced AI platform:
+# docker-compose up -d
+
+# Start with development tools:
+# docker-compose --profile development up -d
+
+# Start with TimescaleDB alternative:
+# docker-compose --profile timescale up -d
+
+# Start production with backups:
+# docker-compose --profile production up -d
+
+# Scale memory services:
+# docker-compose up -d --scale mcp-memory-server=2
+
+# Monitor system health:
+# docker-compose logs -f memory-health-monitor
+
+# View all service logs:
+# docker-compose logs -f
+
+# Restart specific service:
+# docker-compose restart mcp-memory-server
+
+# Stop all services:
+# docker-compose down
+
+# Stop and remove all data:
+# docker-compose down -v
+
+# Update services:
+# docker-compose pull && docker-compose up -d
+
+# Check service status:
+# docker-compose ps
+
+# Execute commands in containers:
+# docker-compose exec mcp-memory-server bash
+# docker-compose exec postgres-memory psql -U memory_user -d memories
+
+# View resource usage:
+# docker-compose top

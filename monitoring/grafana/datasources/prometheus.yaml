@@ -1,0 +1,17 @@
+# monitoring/grafana/datasources/prometheus.yaml
+# Prometheus datasource configuration for Grafana
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus-memory:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: "30s"
+      queryTimeout: "60s"
+      httpMethod: "POST"
+    secureJsonData: {}

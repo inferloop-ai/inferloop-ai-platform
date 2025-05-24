@@ -1,0 +1,81 @@
+# tests/fixtures/test_agents.yaml
+# Test agent configurations for testing scenarios
+
+test_agents:
+  - agent_id: "test-research-agent"
+    name: "Test Research Agent"
+    type: "specialist"
+    specialization: "research"
+    capabilities:
+      - "research"
+      - "fact_checking"
+      - "data_analysis"
+    memory_settings:
+      working_memory_capacity: 5
+      consolidation_frequency_minutes: 60
+      importance_threshold: 0.4
+    
+  - agent_id: "test-support-agent"
+    name: "Test Support Agent"
+    type: "specialist"
+    specialization: "customer_support"
+    capabilities:
+      - "customer_service"
+      - "problem_solving"
+      - "empathy"
+    memory_settings:
+      working_memory_capacity: 8
+      consolidation_frequency_minutes: 120
+      importance_threshold: 0.5
+    
+  - agent_id: "test-creative-agent"
+    name: "Test Creative Agent"
+    type: "specialist"
+    specialization: "creative"
+    capabilities:
+      - "creative_writing"
+      - "brainstorming"
+      - "artistic_creation"
+    memory_settings:
+      working_memory_capacity: 12
+      consolidation_frequency_minutes: 480
+      importance_threshold: 0.2
+
+test_sessions:
+  - session_id: "test-session-001"
+    agents: ["test-research-agent"]
+    duration_minutes: 30
+    interaction_count: 15
+    
+  - session_id: "test-session-002" 
+    agents: ["test-support-agent"]
+    duration_minutes: 45
+    interaction_count: 8
+    
+  - session_id: "test-session-003"
+    agents: ["test-creative-agent", "test-research-agent"]
+    duration_minutes: 60
+    interaction_count: 25
+    collaboration: true
+
+test_scenarios:
+  memory_consolidation:
+    description: "Test memory consolidation with different importance levels"
+    setup:
+      - create_working_memories: 20
+      - importance_range: [0.1, 1.0]
+      - memory_types: ["episodic", "semantic"]
+    
+  multi_agent_coordination:
+    description: "Test coordination between multiple agents"
+    setup:
+      - agents: ["test-research-agent", "test-creative-agent"]
+      - shared_session: "coordination-test-session"
+      - memory_sharing_enabled: true
+    
+  high_load_scenario:
+    description: "Test system under high memory load"
+    setup:
+      - concurrent_agents: 10
+      - memories_per_agent: 100
+      - duration_minutes: 10

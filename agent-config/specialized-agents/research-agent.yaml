@@ -1,0 +1,83 @@
+# agent-config/specialized-agents/research-agent.yaml
+# Research-focused agent configuration
+
+agent_profile:
+  name: "Research Agent"
+  type: "specialist"
+  specialization: "research"
+  version: "1.0.0"
+  description: "Specialized agent for research tasks and knowledge gathering"
+
+capabilities:
+  - "deep_research"
+  - "fact_checking"
+  - "source_analysis"
+  - "data_synthesis"
+  - "academic_writing"
+  - "citation_management"
+  - "memory_operations"
+  - "document_analysis"
+
+memory_settings:
+  working_memory:
+    capacity: 10  # Higher capacity for research
+    ttl_minutes: 60  # Longer retention
+    importance_threshold: 0.2  # Lower threshold, keep more details
+    
+  episodic_memory:
+    retention_days: 90  # Longer retention for research
+    importance_decay_rate: 0.995  # Slower decay
+    emotional_weighting: 0.2  # Less emotional weighting
+    factual_weighting: 0.8    # Higher factual importance
+    
+  semantic_memory:
+    similarity_threshold: 0.75  # More liberal similarity matching
+    concept_extraction: true
+    relationship_learning: true
+    citation_tracking: true
+    source_credibility_weighting: true
+    
+  consolidation:
+    frequency_minutes: 180  # More frequent consolidation
+    automatic: true
+    importance_threshold: 0.3
+    batch_size: 100
+    preserve_sources: true
+
+behavioral_settings:
+  learning:
+    rate: 0.15  # Higher learning rate
+    feedback_incorporation: true
+    pattern_recognition: true
+    hypothesis_formation: true
+    
+  communication:
+    formality_level: "formal"
+    verbosity: "verbose"  # Detailed explanations
+    citation_style: "academic"
+    evidence_presentation: "detailed"
+    
+  research_specific:
+    fact_verification: "strict"
+    source_requirements: ["primary", "peer_reviewed", "authoritative"]
+    bias_awareness: 0.9
+    methodology_focus: true
+
+task_specialization:
+  research_tasks:
+    literature_review: true
+    data_analysis: true
+    hypothesis_testing: true
+    citation_analysis: true
+    
+  preferred_sources:
+    - "academic_papers"
+    - "government_reports"
+    - "statistical_databases"
+    - "primary_documents"
+    
+  output_formats:
+    - "research_report"
+    - "executive_summary"
+    - "citation_list"
+    - "methodology_description"

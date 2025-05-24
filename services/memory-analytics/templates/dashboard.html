@@ -1,0 +1,146 @@
+# ==============================================
+# services/memory-analytics/templates/dashboard.html
+# ==============================================
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .chart-container { height: 400px; }
+        .metric-card { @apply bg-white rounded-lg shadow-md p-6 m-4; }
+        .metric-value { @apply text-3xl font-bold text-blue-600; }
+        .metric-label { @apply text-gray-600 text-sm; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Memory System Analytics</h1>
+        
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="metric-card">
+                <div class="metric-value" id="total-memories">-</div>
+                <div class="metric-label">Total Memories</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="active-agents">-</div>
+                <div class="metric-label">Active Agents</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="avg-importance">-</div>
+                <div class="metric-label">Avg Importance</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="consolidation-rate">-</div>
+                <div class="metric-label">Consolidation Rate</div>
+            </div>
+        </div>
+        
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4">Memory Usage Over Time</h2>
+                <div id="memory-usage-chart" class="chart-container"></div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-2xl font-semibold mb-4">Memory Types Distribution</h2>
+                <div id="memory-types-chart" class="chart-container"></div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
+                <h2 class="text-2xl font-semibold mb-4">Agent Performance</h2>
+                <div id="agent-performance-chart" class="chart-container"></div>
+            </div>
+        </div>
+        
+        <!-- Controls -->
+        <div class="mt-8 text-center">
+            <label class="mr-4">Time Range:</label>
+            <select id="time-range" class="px-4 py-2 border rounded">
+                <option value="1h">Last Hour</option>
+                <option value="24h" selected>Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+                <option value="30d">Last 30 Days</option>
+            </select>
+            <button onclick="refreshData()" class="ml-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Refresh
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        let currentTimeRange = '24h';
+        
+        async function loadMetrics() {
+            try {
+                const response = await fetch(`/api/metrics/memory?time_range=${currentTimeRange}`);
+                const data = await response.json();
+                
+                document.getElementById('total-memories').textContent = data.total_memories.toLocaleString();
+                document.getElementById('avg-importance').textContent = data.avg_importance;
+                document.getElementById('consolidation-rate').textContent = `${data.consolidation_rate}%`;
+                
+                // Load agent count
+                const agentResponse = await fetch(`/api/metrics/agents?time_range=${currentTimeRange}`);
+                const agentData = await agentResponse.json();
+                document.getElementById('active-agents').textContent = agentData.agents.length;
+                
+            } catch (error) {
+                console.error('Error loading metrics:', error);
+            }
+        }
+        
+        async function loadCharts() {
+            try {
+                // Memory usage chart
+                const memoryUsageResponse = await fetch(`/api/charts/memory-usage?time_range=${currentTimeRange}`);
+                const memoryUsageData = await memoryUsageResponse.json();
+                if (Object.keys(memoryUsageData).length > 0) {
+                    Plotly.newPlot('memory-usage-chart', memoryUsageData.data, memoryUsageData.layout);
+                }
+                
+                // Memory types chart
+                const memoryTypesResponse = await fetch('/api/charts/memory-types');
+                const memoryTypesData = await memoryTypesResponse.json();
+                if (Object.keys(memoryTypesData).length > 0) {
+                    Plotly.newPlot('memory-types-chart', memoryTypesData.data, memoryTypesData.layout);
+                }
+                
+                // Agent performance chart
+                const agentPerfResponse = await fetch(`/api/charts/agent-performance?time_range=${currentTimeRange}`);
+                const agentPerfData = await agentPerfResponse.json();
+                if (Object.keys(agentPerfData).length > 0) {
+                    Plotly.newPlot('agent-performance-chart', agentPerfData.data, agentPerfData.layout);
+                }
+                
+            } catch (error) {
+                console.error('Error loading charts:', error);
+            }
+        }
+        
+        function refreshData() {
+            currentTimeRange = document.getElementById('time-range').value;
+            loadMetrics();
+            loadCharts();
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMetrics();
+            loadCharts();
+            
+            // Auto-refresh every 5 minutes
+            setInterval(refreshData, 300000);
+        });
+        
+        // Handle time range changes
+        document.getElementById('time-range').addEventListener('change', refreshData);
+    </script>
+</body>
+</html>

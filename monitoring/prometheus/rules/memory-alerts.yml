@@ -1,0 +1,89 @@
+# monitoring/prometheus/rules/memory-alerts.yml
+# Alert rules for Memory System
+
+groups:
+  - name: memory_system_alerts
+    rules:
+      # Memory System Health
+      - alert: MemorySystemDown
+        expr: up{job="mcp-memory-server"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: memory-system
+        annotations:
+          summary: "Memory System is down"
+          description: "The Memory MCP Server has been down for more than 2 minutes"
+
+      - alert: HighMemoryUsage
+        expr: memory_usage_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: memory-system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 85% for {{ $labels.instance }}"
+
+      # Database Alerts  
+      - alert: PostgreSQLDown
+        expr: up{job="postgres-memory"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL memory database is unreachable"
+
+      - alert: RedisDown
+        expr: up{job="redis-memory"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: cache
+        annotations:
+          summary: "Redis cache is down"
+          description: "Redis memory cache is unreachable"
+
+      # Memory Consolidation Alerts
+      - alert: ConsolidationFailureRate
+        expr: consolidation_failure_rate > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: consolidation
+        annotations:
+          summary: "High consolidation failure rate"
+          description: "Memory consolidation failure rate is {{ $value }}% over the last 10 minutes"
+
+      - alert: LowConsolidationRate
+        expr: consolidation_rate < 0.5
+        for: 30m
+        labels:
+          severity: warning
+          component: consolidation
+        annotations:
+          summary: "Low memory consolidation rate"
+          description: "Memory consolidation rate is below 50%"
+
+      # Agent Performance Alerts
+      - alert: AgentMemoryLeak
+        expr: agent_memory_count > 10000
+        for: 15m
+        labels:
+          severity: warning
+          component: agent
+        annotations:
+          summary: "Potential agent memory leak"
+          description: "Agent {{ $labels.agent_id }} has accumulated {{ $value }} memories"
+
+      - alert: NoActiveAgents
+        expr: active_agent_count == 0
+        for: 5m
+        labels:
+          severity: critical
+          component: orchestrator
+        annotations:
+          summary: "No active agents"
+          description: "No agents are currently active in the system"

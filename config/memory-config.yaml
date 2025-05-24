@@ -1,0 +1,122 @@
+# =====================================================
+# config/memory-config.yaml
+# Main memory system configuration
+# =====================================================
+
+# Memory System Configuration
+memory_system:
+  # Working Memory Settings
+  working_memory:
+    capacity: 7
+    ttl_seconds: 1800  # 30 minutes
+    compression_enabled: true
+    
+  # Episodic Memory Settings  
+  episodic_memory:
+    importance_threshold: 0.3
+    decay_rate: 0.99
+    max_age_days: 365
+    auto_cleanup_enabled: true
+    
+  # Semantic Memory Settings
+  semantic_memory:
+    similarity_threshold: 0.85
+    concept_extraction_enabled: true
+    relationship_strength_threshold: 0.5
+    
+  # Procedural Memory Settings
+  procedural_memory:
+    knowledge_graph_enabled: true
+    entity_extraction_model: "gpt-3.5-turbo"
+    relationship_extraction_enabled: true
+    
+  # Consolidation Settings
+  consolidation:
+    automatic_enabled: true
+    interval_seconds: 21600  # 6 hours
+    batch_size: 100
+    importance_weight: 0.7
+    recency_weight: 0.2
+    access_frequency_weight: 0.1
+    
+  # Memory Analytics
+  analytics:
+    enabled: true
+    metrics_collection_interval: 300  # 5 minutes
+    quality_assessment_enabled: true
+    performance_monitoring_enabled: true
+
+# AI Model Configuration
+ai_models:
+  embedding:
+    model_name: "all-MiniLM-L6-v2"
+    dimension: 384
+    device: "cpu"
+    
+  language_models:
+    openai:
+      model: "gpt-3.5-turbo"
+      temperature: 0.1
+      max_tokens: 1000
+      
+    anthropic:
+      model: "claude-3-sonnet-20240229"
+      temperature: 0.1
+      max_tokens: 1000
+
+# Storage Configuration
+storage:
+  redis:
+    connection_pool_size: 10
+    retry_attempts: 3
+    retry_delay: 1
+    
+  postgresql:
+    pool_size: 20
+    max_overflow: 30
+    pool_timeout: 30
+    pool_recycle: 3600
+    
+  chromadb:
+    batch_size: 1000
+    timeout: 30
+    
+  neo4j:
+    pool_size: 10
+    connection_timeout: 30
+    max_retry_time: 30
+
+# Performance Settings
+performance:
+  max_concurrent_operations: 100
+  query_timeout: 30
+  batch_processing_enabled: true
+  caching_enabled: true
+  cache_ttl: 3600
+
+# Monitoring and Alerts
+monitoring:
+  health_check_interval: 60
+  memory_usage_threshold: 0.8
+  response_time_threshold: 5.0
+  error_rate_threshold: 0.05
+  
+alerts:
+  enabled: true
+  channels:
+    - type: "webhook"
+      url: "${ALERT_WEBHOOK_URL}"
+    - type: "log"
+      level: "ERROR"
+
+# Security Settings
+security:
+  token_validation_enabled: true
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 1000
+    burst_size: 100
+    
+  encryption:
+    enabled: false  # Enable for production
+    key_rotation_days: 30

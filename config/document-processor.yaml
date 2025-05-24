@@ -1,0 +1,91 @@
+# config/document-processor-config.yaml
+# DocumentProcessor Service Configuration
+
+document_processor:
+  # Service settings
+  service:
+    host: "0.0.0.0"
+    port: 8000
+    workers: 1
+    max_request_size: "100MB"
+    
+  # File storage settings
+  storage:
+    upload_path: "/app/uploads"
+    processed_path: "/app/processed"
+    temp_path: "/app/temp"
+    max_file_size_mb: 100
+    allowed_extensions: [
+      "pdf", "docx", "doc", "txt", "csv", "xlsx", "xls",
+      "png", "jpg", "jpeg", "tiff", "html", "md"
+    ]
+    
+  # Processing configuration
+  processing:
+    # Chunking settings
+    chunking:
+      default_chunk_size: 1000
+      min_chunk_size: 50
+      max_chunk_size: 2000
+      overlap_percentage: 20
+      respect_sentence_boundaries: true
+      respect_paragraph_boundaries: true
+      
+    # Embedding settings
+    embeddings:
+      model_name: "all-MiniLM-L6-v2"
+      model_cache_path: "/app/models"
+      batch_size: 32
+      max_sequence_length: 512
+      normalize_embeddings: true
+      
+    # NLP settings
+    nlp:
+      spacy_model: "en_core_web_sm"
+      enable_entity_recognition: true
+      enable_keyword_extraction: true
+      enable_sentiment_analysis: true
+      confidence_threshold: 0.6
+      
+    # OCR settings  
+    ocr:
+      tesseract_config: "--oem 3 --psm 6"
+      languages: ["eng"]
+      confidence_threshold: 60
+      preprocess_images: true
+      dpi: 300
+
+  # Database connections
+  databases:
+    postgresql:
+      pool_size: 10
+      max_overflow: 20
+      pool_timeout: 30
+      
+    chromadb:
+      batch_size: 1000
+      timeout: 30
+      max_retries: 3
+      
+  # Memory integration
+  memory_integration:
+    enabled: true
+    mcp_server_url: "http://mcp-memory-server:8080"
+    rag_service_url: "http://rag-memory-service:8000"
+    store_processing_history: true
+    memory_importance_threshold: 0.5
+    
+  # Performance settings
+  performance:
+    max_concurrent_jobs: 5
+    max_concurrent_documents_per_job: 3
+    processing_timeout_minutes: 60
+    cleanup_interval_hours: 24
+    
+  # Monitoring and logging
+  monitoring:
+    enable_metrics: true
+    enable_health_checks: true
+    log_level: "INFO"
+    log_file: "/app/logs/document-processor.log"
+    metrics_export_interval: 60

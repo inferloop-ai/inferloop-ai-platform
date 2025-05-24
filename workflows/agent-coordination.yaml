@@ -1,0 +1,90 @@
+# workflows/agent-coordination.yaml
+# Multi-agent coordination workflow
+
+workflow:
+  name: "Agent Coordination Workflow"
+  description: "Workflow for coordinating multiple agents on complex tasks"
+  version: "1.0.0"
+
+triggers:
+  - type: "task_submission"
+    condition: "task.requires_coordination == true"
+    enabled: true
+    
+  - type: "collaboration_request"
+    enabled: true
+
+coordination_strategies:
+  - name: "parallel_processing"
+    description: "Agents work on different parts simultaneously"
+    use_case: "large_analysis_tasks"
+    
+  - name: "sequential_handoff"
+    description: "Agents work in sequence, passing results"
+    use_case: "pipeline_processing"
+    
+  - name: "hierarchical_coordination"
+    description: "Lead agent coordinates sub-agents"
+    use_case: "complex_research_projects"
+
+steps:
+  - name: "task_analysis"
+    type: "analysis"
+    actions:
+      - analyze_task_complexity
+      - identify_required_capabilities
+      - estimate_resource_requirements
+      - determine_coordination_strategy
+    
+  - name: "agent_selection"
+    type: "selection"
+    actions:
+      - identify_candidate_agents
+      - assess_agent_availability
+      - evaluate_capability_match
+      - select_optimal_agent_team
+    
+  - name: "coordination_setup"
+    type: "initialization"
+    actions:
+      - establish_communication_channels
+      - share_initial_context
+      - sync_relevant_memories
+      - define_collaboration_protocols
+    
+  - name: "task_execution"
+    type: "execution"
+    parallel: true
+    actions:
+      - execute_agent_tasks
+      - monitor_progress
+      - facilitate_inter_agent_communication
+      - manage_shared_memory_updates
+    
+  - name: "result_integration"
+    type: "integration"
+    actions:
+      - collect_agent_results
+      - resolve_conflicts
+      - synthesize_final_output
+      - update_shared_memories
+
+memory_coordination:
+  shared_context:
+    - task_objectives
+    - relevant_background
+    - current_progress
+    - discovered_insights
+    
+  memory_sync_frequency: "5_minutes"
+  conflict_resolution: "importance_weighted"
+  
+communication_protocols:
+  - type: "status_updates"
+    frequency: "2_minutes"
+    
+  - type: "result_sharing"
+    trigger: "milestone_completion"
+    
+  - type: "help_requests"
+    response_time: "30_seconds"

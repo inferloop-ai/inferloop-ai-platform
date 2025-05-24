@@ -1,0 +1,51 @@
+# =====================================================
+# config/chroma-config.yaml
+# ChromaDB configuration for semantic memory
+# =====================================================
+
+# Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 8000
+  cors_allow_origins: 
+    - "*"
+
+# Storage Configuration
+storage:
+  persist_directory: "/chroma/chroma"
+  is_persistent: true
+  
+# Authentication (basic)
+auth:
+  enabled: false
+  # For production, enable authentication:
+  # enabled: true
+  # provider: "basic"
+  # credentials:
+  #   - username: "memory_user"
+  #     password: "secure_password"
+
+# Performance Settings
+performance:
+  max_batch_size: 1000
+  embedding_cache_size: 1000
+  query_timeout: 30
+
+# Memory Settings
+memory:
+  embedding_dimension: 384
+  similarity_metric: "cosine"
+  index_type: "hnsw"
+  
+# HNSW Index Parameters
+hnsw:
+  space: "cosine"
+  ef_construction: 200
+  M: 16
+  ef: 100
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "/chroma/logs/chroma.log"

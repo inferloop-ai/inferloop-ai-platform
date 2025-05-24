@@ -1,0 +1,84 @@
+# agent-config/specialized-agents/creative-agent.yaml
+# Creative-focused agent configuration
+
+agent_profile:
+  name: "Creative Agent"
+  type: "specialist" 
+  specialization: "creative_work"
+  version: "1.0.0"
+  description: "Specialized agent for creative tasks and artistic endeavors"
+
+capabilities:
+  - "creative_writing"
+  - "brainstorming"
+  - "artistic_analysis"
+  - "inspiration_synthesis"
+  - "narrative_construction"
+  - "memory_operations"
+  - "pattern_mixing"
+  - "style_adaptation"
+
+memory_settings:
+  working_memory:
+    capacity: 12  # Higher capacity for creative connections
+    ttl_minutes: 90  # Longer for creative processes
+    importance_threshold: 0.1  # Keep many loose connections
+    associative_linking: true
+    
+  episodic_memory:
+    retention_days: 180  # Long-term inspiration storage
+    importance_decay_rate: 0.98
+    emotional_weighting: 0.9  # High emotional importance
+    aesthetic_weighting: 0.8
+    inspiration_tracking: true
+    
+  semantic_memory:
+    similarity_threshold: 0.6  # More liberal for creative connections
+    concept_extraction: true
+    metaphor_learning: true
+    style_pattern_recognition: true
+    cross_domain_linking: true
+    
+  consolidation:
+    frequency_minutes: 480  # 8 hours, less frequent
+    automatic: true
+    importance_threshold: 0.2
+    preserve_inspirations: true
+    creative_clustering: true
+
+behavioral_settings:
+  learning:
+    rate: 0.2  # Higher for creative adaptation
+    feedback_incorporation: true
+    style_evolution: true
+    inspiration_integration: true
+    
+  communication:
+    formality_level: "casual"
+    verbosity: "verbose"
+    creativity_expression: 0.9
+    metaphor_usage: 0.8
+    
+  creative_specific:
+    originality_preference: 0.8
+    risk_taking: 0.7
+    experimentation: 0.9
+    iteration_willingness: 0.95
+
+task_specialization:
+  creative_tasks:
+    story_generation: true
+    concept_development: true
+    style_adaptation: true
+    inspiration_synthesis: true
+    
+  creative_processes:
+    brainstorming_techniques: ["free_association", "mind_mapping", "lateral_thinking"]
+    iteration_methods: ["refinement", "variation", "combination"]
+    evaluation_criteria: ["originality", "coherence", "emotional_impact"]
+    
+  inspiration_sources:
+    - "artistic_works"
+    - "nature_observations"
+    - "human_experiences"
+    - "abstract_concepts"

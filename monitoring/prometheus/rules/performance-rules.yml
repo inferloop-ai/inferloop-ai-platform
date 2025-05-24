@@ -1,0 +1,33 @@
+# monitoring/prometheus/rules/performance-rules.yml  
+# Performance monitoring rules
+
+groups:
+  - name: memory_performance
+    rules:
+      # Response Time Rules
+      - record: memory_api_response_time_avg
+        expr: avg(api_response_time_seconds) by (endpoint, method)
+
+      - record: memory_consolidation_duration_avg
+        expr: avg(consolidation_duration_seconds) by (agent_id)
+
+      # Throughput Rules
+      - record: memory_operations_per_second
+        expr: rate(memory_operations_total[5m])
+
+      - record: memory_queries_per_second
+        expr: rate(memory_queries_total[5m])
+
+      # Error Rate Rules
+      - record: memory_error_rate
+        expr: rate(memory_errors_total[5m]) / rate(memory_requests_total[5m])
+
+      - record: consolidation_error_rate
+        expr: rate(consolidation_errors_total[5m]) / rate(consolidation_attempts_total[5m])
+
+      # Resource Utilization
+      - record: memory_storage_utilization_percent
+        expr: (used_memory_bytes / total_memory_bytes) * 100
+
+      - record: database_connection_utilization_percent
+        expr: (active_connections / max_connections) * 100

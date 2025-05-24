@@ -1,0 +1,210 @@
+# monitoring/grafana/memory-dashboards/memory-overview.json
+# Main Memory System Overview Dashboard
+
+{
+  "dashboard": {
+    "id": null,
+    "title": "Memory System Overview",
+    "tags": ["memory", "overview"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "System Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"mcp-memory-server\"}",
+            "legendFormat": "Memory Server"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [
+              {
+                "options": {
+                  "0": {
+                    "text": "DOWN"
+                  },
+                  "1": {
+                    "text": "UP"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Memories",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "memory_total_count",
+            "legendFormat": "Total"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 6,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Active Agents",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "active_agent_count",
+            "legendFormat": "Active"
+          }
+        ],
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Memory Operations Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "rate(memory_operations_total[5m])",
+            "legendFormat": "Ops/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        },
+        "gridPos": {
+          "h": 4,
+          "w": 6,
+          "x": 18,
+          "y": 0
+        }
+      },
+      {
+        "id": 5,
+        "title": "Memory Types Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "working_memory_count",
+            "legendFormat": "Working"
+          },
+          {
+            "expr": "episodic_memory_count", 
+            "legendFormat": "Episodic"
+          },
+          {
+            "expr": "semantic_memory_count",
+            "legendFormat": "Semantic"
+          },
+          {
+            "expr": "procedural_memory_count",
+            "legendFormat": "Procedural"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 4
+        }
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage Over Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "memory_total_count",
+            "legendFormat": "Total Memories"
+          },
+          {
+            "expr": "rate(memory_operations_total[5m]) * 60",
+            "legendFormat": "Operations/min"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": {
+              "drawStyle": "line",
+              "lineInterpolation": "smooth"
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 4
+        }
+      },
+      {
+        "id": 7,
+        "title": "Consolidation Metrics",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "consolidation_rate",
+            "legendFormat": "Success Rate"
+          },
+          {
+            "expr": "consolidation_duration_avg",
+            "legendFormat": "Avg Duration"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 12
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

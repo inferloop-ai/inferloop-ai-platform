@@ -1,0 +1,186 @@
+
+# =====================================================
+# nginx/memory-nginx.conf
+# Nginx configuration for memory API gateway
+# =====================================================
+
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+    use epoll;
+    multi_accept on;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Logging
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for" '
+                    'rt=$request_time uct="$upstream_connect_time" '
+                    'uht="$upstream_header_time" urt="$upstream_response_time"';
+    
+    access_log /var/log/nginx/access.log main;
+    
+    # Performance settings
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    client_max_body_size 10M;
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_comp_level 6;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/json
+        application/javascript
+        application/xml+rss
+        application/atom+xml
+        image/svg+xml;
+    
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=api:10m rate=100r/m;
+    limit_req_status 429;
+    
+    # Upstream servers
+    upstream mcp_memory_servers {
+        least_conn;
+        server mcp-memory-server:8080 weight=1 max_fails=3 fail_timeout=30s;
+        # Add more servers for load balancing
+        # server mcp-memory-server-2:8080 weight=1 max_fails=3 fail_timeout=30s;
+    }
+    
+    upstream rag_memory_servers {
+        least_conn;
+        server rag-memory-service:8000 weight=1 max_fails=3 fail_timeout=30s;
+    }
+    
+    upstream agent_orchestrator_servers {
+        least_conn;
+        server agent-memory-orchestrator:8000 weight=1 max_fails=3 fail_timeout=30s;
+    }
+    
+    upstream memory_analytics_servers {
+        least_conn;
+        server memory-analytics:8000 weight=1 max_fails=3 fail_timeout=30s;
+    }
+    
+    # Main server block
+    server {
+        listen 80;
+        server_name memory-ai.local localhost;
+        
+        # Security headers
+        add_header X-Frame-Options SAMEORIGIN;
+        add_header X-Content-Type-Options nosniff;
+        add_header X-XSS-Protection "1; mode=block";
+        add_header Referrer-Policy "strict-origin-when-cross-origin";
+        
+        # Health check endpoint
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+        
+        # MCP Memory Server API
+        location /api/memory/ {
+            limit_req zone=api burst=20 nodelay;
+            
+            proxy_pass http://mcp_memory_servers/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # Timeouts
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+            
+            # Buffering
+            proxy_buffering on;
+            proxy_buffer_size 4k;
+            proxy_buffers 8 4k;
+        }
+        
+        # RAG Memory Service API
+        location /api/rag/ {
+            limit_req zone=api burst=10 nodelay;
+            
+            proxy_pass http://rag_memory_servers/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            proxy_connect_timeout 60s;
+            proxy_send_timeout 60s;
+            proxy_read_timeout 60s;
+        }
+        
+        # Agent Orchestrator API
+        location /api/agents/ {
+            limit_req zone=api burst=15 nodelay;
+            
+            proxy_pass http://agent_orchestrator_servers/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            proxy_connect_timeout 45s;
+            proxy_send_timeout 45s;
+            proxy_read_timeout 45s;
+        }
+        
+        # Memory Analytics Dashboard
+        location /analytics/ {
+            proxy_pass http://memory_analytics_servers/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        # Static assets
+        location /static/ {
+            expires 1d;
+            add_header Cache-Control "public, immutable";
+        }
+        
+        # Default location
+        location / {
+            return 200 "Memory-Enhanced AI Platform Gateway";
+            add_header Content-Type text/plain;
+        }
+    }
+    
+    # HTTPS server (for production)
+    # server {
+    #     listen 443 ssl http2;
+    #     server_name memory-ai.local;
+    #     
+    #     ssl_certificate /etc/nginx/ssl/cert.pem;
+    #     ssl_certificate_key /etc/nginx/ssl/key.pem;
+    #     ssl_protocols TLSv1.2 TLSv1.3;
+    #     ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384;
+    #     ssl_prefer_server_ciphers off;
+    #     
+    #     # Include the same location blocks as HTTP server
+    # }
+}

@@ -1,0 +1,40 @@
+# agent-config/memory-profiles/balanced-retention.yaml
+# Balanced memory profile - standard settings
+
+memory_profile:
+  name: "Balanced Retention Profile"
+  description: "Balanced approach to memory management and learning"
+  version: "1.0.0"
+
+retention_settings:
+  working_memory:
+    retention_factor: 1.0     # Standard retention
+    decay_rate: 0.99         # Standard decay
+    
+  episodic_memory:
+    retention_days: 60       # Moderate retention
+    importance_threshold: 0.4 # Moderate threshold
+    decay_rate: 0.99         # Standard decay
+    
+  semantic_memory:
+    similarity_threshold: 0.8 # Moderate similarity
+    concept_lifetime_days: 120
+    relationship_strength_threshold: 0.6
+
+consolidation_behavior:
+  frequency_multiplier: 1.0    # Standard frequency
+  importance_boost: 1.0        # No boost
+  batch_size_modifier: 1.0     # Standard batch size
+  balanced_approach: true
+
+filtering_criteria:
+  minimum_importance: 0.3      # Moderate threshold
+  emotional_threshold: 0.2     # Moderate emotional sensitivity
+  factual_accuracy_requirement: 0.7
+  balanced_weighting: true
+
+learning_parameters:
+  adaptation_rate: 0.1         # Moderate adaptation
+  confidence_requirement: 0.6  # Moderate confidence
+  incremental_learning: true   # Gradual improvements
+  stability_preference: 0.7

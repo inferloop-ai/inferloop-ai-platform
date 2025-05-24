@@ -1,0 +1,95 @@
+# monitoring/prometheus/prometheus-memory.yml
+# Prometheus configuration for Memory System monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'memory-ai-platform'
+    environment: 'production'
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # Add Alertmanager targets here if needed
+          # - alertmanager:9093
+
+scrape_configs:
+  # Memory MCP Server
+  - job_name: 'mcp-memory-server'
+    static_configs:
+      - targets: ['mcp-memory-server:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    honor_labels: true
+
+  # RAG Memory Service
+  - job_name: 'rag-memory-service' 
+    static_configs:
+      - targets: ['rag-memory-service:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Agent Memory Orchestrator
+  - job_name: 'agent-orchestrator'
+    static_configs:
+      - targets: ['agent-memory-orchestrator:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Memory Analytics Service
+  - job_name: 'memory-analytics'
+    static_configs:
+      - targets: ['memory-analytics:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+
+  # Memory Health Monitor
+  - job_name: 'memory-health-monitor'
+    static_configs:
+      - targets: ['memory-health-monitor:8000']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # PostgreSQL Database
+  - job_name: 'postgres-memory'
+    static_configs:
+      - targets: ['postgres-memory:5432']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+
+  # Redis Memory Cache
+  - job_name: 'redis-memory'
+    static_configs:
+      - targets: ['redis-memory:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # ChromaDB Vector Database
+  - job_name: 'chroma-memory'
+    static_configs:
+      - targets: ['chroma-memory:8000']
+    metrics_path: '/api/v1/metrics'
+    scrape_interval: 60s
+
+  # Neo4j Graph Database
+  - job_name: 'neo4j-memory'
+    static_configs:
+      - targets: ['neo4j-memory:7474']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+
+  # System metrics (if node_exporter is available)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+    scrape_interval: 60s
+
+
+
+

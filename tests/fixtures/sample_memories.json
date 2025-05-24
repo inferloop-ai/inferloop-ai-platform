@@ -1,0 +1,129 @@
+# tests/fixtures/sample_memories.json
+{
+  "test_memories": [
+    {
+      "content": "User expressed strong interest in machine learning fundamentals, particularly neural networks and deep learning architectures",
+      "memory_type": "episodic",
+      "agent_id": "research-agent-001",
+      "session_id": "session-001",
+      "importance": 0.85,
+      "emotional_valence": 0.3,
+      "tags": ["machine_learning", "neural_networks", "education", "user_interest"],
+      "metadata": {
+        "topic_category": "technology",
+        "user_engagement_level": "high",
+        "follow_up_required": true
+      }
+    },
+    {
+      "content": "Successfully resolved customer login issue by guiding through password reset process. Customer expressed gratitude and satisfaction",
+      "memory_type": "episodic",
+      "agent_id": "support-agent-001",
+      "session_id": "session-002",
+      "importance": 0.7,
+      "emotional_valence": 0.8,
+      "tags": ["customer_support", "login_issue", "resolution", "satisfaction"],
+      "metadata": {
+        "issue_type": "authentication",
+        "resolution_time_minutes": 8,
+        "customer_satisfaction": "high",
+        "escalation_required": false
+      }
+    },
+    {
+      "content": "Created an engaging science fiction story about space exploration that incorporated user's love for adventure and discovery",
+      "memory_type": "episodic",
+      "agent_id": "creative-agent-001",
+      "session_id": "session-003",
+      "importance": 0.65,
+      "emotional_valence": 0.9,
+      "tags": ["creative_writing", "science_fiction", "space_exploration", "adventure"],
+      "metadata": {
+        "genre": "science_fiction",
+        "word_count": 1200,
+        "user_feedback": "loved_it",
+        "creativity_score": 0.82
+      }
+    },
+    {
+      "content": "User mentioned they are working on a Python project involving data analysis and need help with pandas operations",
+      "memory_type": "working",
+      "agent_id": "research-agent-001",
+      "session_id": "session-004",
+      "importance": 0.6,
+      "emotional_valence": 0.0,
+      "tags": ["python", "data_analysis", "pandas", "programming_help"],
+      "metadata": {
+        "programming_language": "python",
+        "library": "pandas",
+        "assistance_type": "technical_help"
+      }
+    },
+    {
+      "content": "Customer reported recurring billing issue - account being charged twice for the same service monthly",
+      "memory_type": "working",
+      "agent_id": "support-agent-001",
+      "session_id": "session-005",
+      "importance": 0.8,
+      "emotional_valence": -0.4,
+      "tags": ["billing_issue", "duplicate_charges", "recurring_problem", "urgent"],
+      "metadata": {
+        "issue_severity": "high",
+        "financial_impact": true,
+        "requires_escalation": true,
+        "reported_date": "2024-12-23"
+      }
+    }
+  ],
+  "semantic_concepts": [
+    {
+      "concept_name": "machine_learning",
+      "concept_type": "technology",
+      "definition": "A method of data analysis that automates analytical model building using algorithms that iteratively learn from data",
+      "agent_id": "research-agent-001",
+      "strength": 0.95,
+      "related_concepts": ["artificial_intelligence", "neural_networks", "data_science"]
+    },
+    {
+      "concept_name": "customer_satisfaction",
+      "concept_type": "metric",
+      "definition": "A measure of how products and services supplied by a company meet or surpass customer expectation",
+      "agent_id": "support-agent-001",
+      "strength": 0.9,
+      "related_concepts": ["customer_service", "quality_assurance", "user_experience"]
+    },
+    {
+      "concept_name": "narrative_structure",
+      "concept_type": "literary",
+      "definition": "The structural framework of a story, including elements like plot, character development, setting, and theme",
+      "agent_id": "creative-agent-001",
+      "strength": 0.88,
+      "related_concepts": ["storytelling", "plot_development", "character_arc"]
+    }
+  ],
+  "consolidation_scenarios": [
+    {
+      "scenario_name": "high_importance_immediate",
+      "description": "High importance memories that should be consolidated immediately",
+      "memories": [
+        {
+          "content": "Critical system security vulnerability discovered in user's production environment",
+          "importance": 0.95,
+          "consolidation_target": ["episodic", "semantic", "procedural"]
+        }
+      ]
+    },
+    {
+      "scenario_name": "medium_importance_batch",
+      "description": "Medium importance memories suitable for batch consolidation",
+      "memories": [
+        {
+          "content": "User preferences for UI dark mode and notification settings",
+          "importance": 0.5,
+          "consolidation_target": ["episodic", "semantic"]
+        }
+      ]
+    }
+  ]
+}
+

@@ -1,0 +1,156 @@
+# agent-config/specialized-agents/document-processor-agent.yaml
+# DocumentProcessor Agent Configuration
+
+agent_profile:
+  name: "DocumentProcessor Agent"
+  type: "specialist"
+  specialization: "document_processing"
+  version: "1.0.0"
+  description: "Specialized agent for processing, analyzing, and indexing documents"
+
+capabilities:
+  - "document_parsing"
+  - "text_extraction"
+  - "content_chunking"
+  - "embedding_generation"
+  - "nlp_analysis"
+  - "ocr_processing"
+  - "metadata_extraction"
+  - "vector_storage"
+  - "memory_integration"
+
+processing_settings:
+  # Chunking configuration
+  chunking:
+    default_chunk_size: 1000
+    default_chunk_overlap: 200
+    min_chunk_size: 50
+    max_chunks_per_document: 1000
+    sentence_boundary_respect: true
+    
+  # Embedding configuration
+  embeddings:
+    model: "all-MiniLM-L6-v2"
+    dimension: 384
+    batch_size: 32
+    normalize: true
+    
+  # NLP analysis settings
+  nlp_analysis:
+    enable_entity_extraction: true
+    enable_keyword_extraction: true
+    enable_sentiment_analysis: true
+    enable_language_detection: true
+    confidence_threshold: 0.8
+    
+  # OCR settings
+  ocr:
+    enable_ocr: true
+    languages: ["eng"]
+    confidence_threshold: 60
+    preprocess_images: true
+
+memory_settings:
+  working_memory:
+    capacity: 15  # Higher capacity for document processing
+    ttl_minutes: 60  # Longer retention for processing tasks
+    importance_threshold: 0.3
+    
+  episodic_memory:
+    retention_days: 120  # Longer retention for document processing history
+    importance_decay_rate: 0.995
+    emotional_weighting: 0.1  # Lower emotional weighting
+    factual_weighting: 0.9    # Higher factual importance
+    
+  semantic_memory:
+    similarity_threshold: 0.8
+    concept_extraction: true
+    relationship_learning: true
+    document_linking: true
+    
+  consolidation:
+    frequency_minutes: 240  # 4 hours
+    automatic: true
+    importance_threshold: 0.4
+    preserve_processing_history: true
+
+behavioral_settings:
+  learning:
+    rate: 0.12
+    feedback_incorporation: true
+    pattern_recognition: true
+    processing_optimization: true
+    
+  communication:
+    formality_level: "formal"
+    verbosity: "detailed"
+    technical_precision: 0.9
+    
+  processing_specific:
+    quality_assurance: "strict"
+    error_handling: "comprehensive"
+    progress_reporting: true
+    batch_processing: true
+
+supported_formats:
+  text_documents:
+    - "pdf"
+    - "docx"
+    - "doc"
+    - "txt"
+    - "rtf"
+    - "odt"
+    
+  data_formats:
+    - "csv"
+    - "xlsx"
+    - "xls"
+    - "json"
+    - "xml"
+    
+  web_formats:
+    - "html"
+    - "htm"
+    - "markdown"
+    - "md"
+    
+  image_formats:
+    - "png"
+    - "jpg"
+    - "jpeg"
+    - "tiff"
+    - "bmp"
+    - "gif"
+
+performance_settings:
+  # Task handling
+  task_management:
+    max_concurrent_documents: 5
+    max_file_size_mb: 100
+    timeout_minutes: 60
+    retry_attempts: 3
+    
+  # Resource usage
+  resource_limits:
+    memory_usage_mb: 2048
+    cpu_usage_percent: 70
+    temp_storage_mb: 1024
+
+quality_control:
+  validation_rules:
+    min_text_length: 10
+    max_text_length: 10000000  # 10MB of text
+    encoding_detection: true
+    content_validation: true
+    
+  processing_quality:
+    embedding_quality_check: true
+    chunk_quality_threshold: 0.7
+    duplicate_detection: true
+    
+monitoring:
+  metrics_collection: true
+  performance_tracking: true
+  error_reporting: true
+  processing_analytics: true
+

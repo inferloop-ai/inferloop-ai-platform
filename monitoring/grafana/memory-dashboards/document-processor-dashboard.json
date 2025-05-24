@@ -1,0 +1,145 @@
+# monitoring/grafana/memory-dashboards/document-processor-dashboard.json
+# Grafana dashboard for DocumentProcessor monitoring
+
+{
+  "dashboard": {
+    "id": null,
+    "title": "DocumentProcessor Performance Dashboard",
+    "tags": ["document-processing", "memory-integration"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Processing Statistics",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "document_processor_documents_processed_total",
+            "legendFormat": "Documents Processed"
+          },
+          {
+            "expr": "document_processor_chunks_created_total", 
+            "legendFormat": "Chunks Created"
+          },
+          {
+            "expr": "document_processor_embeddings_generated_total",
+            "legendFormat": "Embeddings Generated"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "unit": "short"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Processing Queue Status",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "document_processor_active_jobs",
+            "legendFormat": "Active Jobs"
+          },
+          {
+            "expr": "document_processor_queued_jobs",
+            "legendFormat": "Queued Jobs"
+          },
+          {
+            "expr": "document_processor_completed_jobs",
+            "legendFormat": "Completed Jobs"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 6
+        }
+      },
+      {
+        "id": 3,
+        "title": "Processing Duration",
+        "type": "histogram",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, document_processor_duration_seconds_bucket)",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, document_processor_duration_seconds_bucket)",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 6
+        }
+      },
+      {
+        "id": 4,
+        "title": "Document Types Processed",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "document_processor_documents_by_type",
+            "legendFormat": "{{document_type}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 14
+        }
+      },
+      {
+        "id": 5,
+        "title": "Error Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(document_processor_errors_total[5m])",
+            "legendFormat": "Error Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.01},
+                {"color": "red", "value": 0.05}
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 14
+        }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}

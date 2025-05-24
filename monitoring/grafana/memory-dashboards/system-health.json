@@ -1,0 +1,115 @@
+# monitoring/grafana/memory-dashboards/system-health.json
+# System Health Dashboard
+
+{
+  "dashboard": {
+    "id": null,
+    "title": "Memory System Health",
+    "tags": ["health", "infrastructure"],
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Uptime",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=~\".*memory.*\"}",
+            "legendFormat": "{{job}}"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "reduce",
+            "options": {
+              "reducers": ["lastNotNull"]
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Database Connections",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "postgres_active_connections",
+            "legendFormat": "PostgreSQL Active"
+          },
+          {
+            "expr": "redis_connected_clients",
+            "legendFormat": "Redis Clients"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 6
+        }
+      },
+      {
+        "id": 3,
+        "title": "Memory Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "postgres_memory_usage_bytes",
+            "legendFormat": "PostgreSQL"
+          },
+          {
+            "expr": "redis_used_memory_bytes", 
+            "legendFormat": "Redis"
+          },
+          {
+            "expr": "process_resident_memory_bytes{job=\"mcp-memory-server\"}",
+            "legendFormat": "Memory Server"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes"
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 6
+        }
+      },
+      {
+        "id": 4,
+        "title": "Error Rates",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(memory_errors_total[5m])",
+            "legendFormat": "Memory Errors"
+          },
+          {
+            "expr": "rate(consolidation_errors_total[5m])",
+            "legendFormat": "Consolidation Errors"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 14
+        }
+      }
+    ],
+    "time": {
+      "from": "now-2h",
+      "to": "now"
+    },
+    "refresh": "30s"
+  }
+}
+

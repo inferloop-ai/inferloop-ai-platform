@@ -1,0 +1,42 @@
+# agent-config/memory-profiles/conservative-memory.yaml
+# Conservative memory profile - slow forgetting, high selectivity
+
+memory_profile:
+  name: "Conservative Memory Profile"
+  description: "Cautious memory management with high retention and selectivity"
+  version: "1.0.0"
+
+retention_settings:
+  # High retention across all memory types
+  working_memory:
+    retention_factor: 1.2  # Keep things longer
+    decay_rate: 0.95      # Slower decay
+    
+  episodic_memory:
+    retention_days: 90     # Long retention
+    importance_threshold: 0.6  # Higher threshold
+    decay_rate: 0.995      # Very slow decay
+    
+  semantic_memory:
+    similarity_threshold: 0.9  # High similarity required
+    concept_lifetime_days: 180
+    relationship_strength_threshold: 0.7
+
+consolidation_behavior:
+  frequency_multiplier: 0.5    # Less frequent consolidation
+  importance_boost: 1.2        # Boost importance scores
+  batch_size_modifier: 0.8     # Smaller batches
+  quality_over_quantity: true
+
+filtering_criteria:
+  # Strict filtering
+  minimum_importance: 0.5
+  emotional_threshold: 0.3
+  factual_accuracy_requirement: 0.9
+  source_credibility_minimum: 0.8
+
+learning_parameters:
+  adaptation_rate: 0.05        # Slow adaptation
+  confidence_requirement: 0.8  # High confidence needed
+  evidence_accumulation: true  # Require multiple confirmations
+  conservative_updates: true

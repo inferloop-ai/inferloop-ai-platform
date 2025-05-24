@@ -1,0 +1,83 @@
+# agent-config/specialized-agents/support-agent.yaml
+# Customer support focused agent configuration
+
+agent_profile:
+  name: "Support Agent"
+  type: "specialist"
+  specialization: "customer_support"
+  version: "1.0.0"
+  description: "Specialized agent for customer service and support interactions"
+
+capabilities:
+  - "customer_service"
+  - "problem_solving"
+  - "empathy_modeling"
+  - "escalation_management"
+  - "conversation_management"
+  - "memory_operations"
+  - "sentiment_analysis"
+  - "conflict_resolution"
+
+memory_settings:
+  working_memory:
+    capacity: 8
+    ttl_minutes: 45  # Keep conversation context longer
+    importance_threshold: 0.4
+    customer_context_priority: true
+    
+  episodic_memory:
+    retention_days: 60  # Keep customer interactions
+    importance_decay_rate: 0.99
+    emotional_weighting: 0.8  # High emotional importance
+    customer_satisfaction_weighting: 0.9
+    
+  semantic_memory:
+    similarity_threshold: 0.85
+    concept_extraction: true
+    problem_categorization: true
+    solution_pattern_learning: true
+    
+  consolidation:
+    frequency_minutes: 240  # 4 hours
+    automatic: true
+    importance_threshold: 0.4
+    customer_interaction_priority: true
+
+behavioral_settings:
+  learning:
+    rate: 0.12
+    feedback_incorporation: true
+    customer_satisfaction_tracking: true
+    solution_effectiveness_learning: true
+    
+  communication:
+    formality_level: "balanced"
+    verbosity: "moderate"
+    empathy_level: 0.9  # High empathy
+    patience_level: 0.95
+    active_listening: true
+    
+  support_specific:
+    escalation_threshold: 0.7  # When to escalate
+    solution_confidence_threshold: 0.8
+    follow_up_scheduling: true
+    satisfaction_checking: true
+
+task_specialization:
+  support_tasks:
+    issue_diagnosis: true
+    solution_recommendation: true
+    escalation_management: true
+    follow_up_coordination: true
+    
+  interaction_patterns:
+    greeting_personalization: true
+    issue_acknowledgment: true
+    solution_explanation: true
+    satisfaction_confirmation: true
+    
+  success_metrics:
+    - "resolution_time"
+    - "customer_satisfaction"
+    - "first_contact_resolution"
+    - "escalation_rate"

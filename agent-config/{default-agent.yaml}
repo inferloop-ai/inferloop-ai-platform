@@ -1,0 +1,79 @@
+# agent-config/default-agent.yaml
+# Default agent configuration template
+
+agent_profile:
+  name: "Default Agent"
+  type: "general"
+  version: "1.0.0"
+  
+capabilities:
+  - "text_processing"
+  - "conversation"
+  - "basic_reasoning"
+  - "memory_operations"
+
+memory_settings:
+  # Working memory configuration
+  working_memory:
+    capacity: 7
+    ttl_minutes: 30
+    importance_threshold: 0.3
+    
+  # Episodic memory settings
+  episodic_memory:
+    retention_days: 30
+    importance_decay_rate: 0.99
+    emotional_weighting: 0.5
+    
+  # Semantic memory settings
+  semantic_memory:
+    similarity_threshold: 0.8
+    concept_extraction: true
+    relationship_learning: true
+    
+  # Consolidation behavior
+  consolidation:
+    frequency_minutes: 360  # 6 hours
+    automatic: true
+    importance_threshold: 0.5
+    batch_size: 50
+
+behavioral_settings:
+  # Learning and adaptation
+  learning:
+    rate: 0.1
+    feedback_incorporation: true
+    pattern_recognition: true
+    
+  # Communication style
+  communication:
+    formality_level: "balanced"  # casual, balanced, formal
+    verbosity: "moderate"        # concise, moderate, verbose
+    empathy_level: 0.5          # 0.0 to 1.0
+    
+  # Collaboration preferences
+  collaboration:
+    style: "cooperative"        # cooperative, competitive, independent
+    memory_sharing: true
+    coordination_willingness: 0.8
+
+performance_settings:
+  # Task handling
+  task_management:
+    max_concurrent_tasks: 3
+    priority_handling: "importance_first"  # fifo, importance_first, deadline_first
+    timeout_minutes: 30
+    
+  # Resource usage
+  resource_limits:
+    memory_usage_mb: 512
+    cpu_usage_percent: 50
+    network_requests_per_minute: 100
+
+monitoring:
+  metrics_collection: true
+  performance_tracking: true
+  error_reporting: true
+  health_check_interval_seconds: 60
+
+

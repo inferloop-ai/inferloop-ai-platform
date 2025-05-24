@@ -1,0 +1,21 @@
+# monitoring/grafana/datasources/postgres.yaml  
+# PostgreSQL datasource configuration for Grafana
+
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL-Memory
+    type: postgres
+    access: proxy
+    url: postgres-memory:5432
+    database: memories
+    user: memory_user
+    secureJsonData:
+      password: memorypass123
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false

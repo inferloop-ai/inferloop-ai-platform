@@ -1,0 +1,159 @@
+# monitoring/grafana/memory-dashboards/consolidation-metrics.json
+# Memory Consolidation Metrics Dashboard
+
+{
+  "dashboard": {
+    "id": null,
+    "title": "Memory Consolidation Metrics",
+    "tags": ["consolidation", "memory"],
+    "panels": [
+      {
+        "id": 1,
+        "title": "Consolidation Success Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "consolidation_success_rate * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "green", "value": 90}
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 8,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "Consolidation Duration",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg(consolidation_duration_seconds)",
+            "legendFormat": "Avg Duration"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 8,
+          "x": 8,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "Memories Processed",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(consolidation_memories_processed)",
+            "legendFormat": "Total Processed"
+          }
+        ],
+        "gridPos": {
+          "h": 6,
+          "w": 8,
+          "x": 16,
+          "y": 0
+        }
+      },
+      {
+        "id": 4,
+        "title": "Consolidation Timeline",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(consolidation_attempts_total[5m])",
+            "legendFormat": "Attempts/min"
+          },
+          {
+            "expr": "rate(consolidation_success_total[5m])",
+            "legendFormat": "Success/min"
+          },
+          {
+            "expr": "rate(consolidation_errors_total[5m])",
+            "legendFormat": "Errors/min"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 6
+        }
+      },
+      {
+        "id": 5,
+        "title": "Memory Type Consolidation Distribution",
+        "type": "bargauge",
+        "targets": [
+          {
+            "expr": "consolidation_by_type",
+            "legendFormat": "{{memory_type}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 14
+        }
+      },
+      {
+        "id": 6,
+        "title": "Agent Consolidation Activity",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "consolidation_by_agent",
+            "legendFormat": "{{agent_id}}"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "agent_id": "Agent ID",
+                "Value": "Consolidations"
+              }
+            }
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 14
+        }
+      }
+    ],
+    "time": {
+      "from": "now-24h",
+      "to": "now"
+    },
+    "refresh": "5m"
+  }
+}
